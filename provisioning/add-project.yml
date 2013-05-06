@@ -1,0 +1,25 @@
+##
+# Ansible playbook for setting up a new drupal project
+
+---
+- hosts: all
+  user: vagrant
+  sudo: yes
+
+  var_prompt:
+    project: "Project to name to add"
+
+  tasks:
+
+    - name: Apache | Add vhost for the project
+      action: template src=templates/etc-apache2-sites-available-devserver.j2 dest=/etc/apache2/sites-available/{{ project }}
+      tags: common
+
+    - name: Apache | Enable new project site
+      action: command a2ensite {{ project }}
+      notify:
+        - restart apache
+      tags: common
+
+    - name: Mysql | Create new database
+      mysql_db: db={{ project }} state=present

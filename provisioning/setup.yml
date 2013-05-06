@@ -1,0 +1,125 @@
+##
+# Ansible playbook for setting up a LAMP development server on Ubuntu 12.04.
+#
+
+---
+- hosts: all
+  user: vagrant
+  sudo: yes
+
+  vars_files:
+    - settings.yml
+
+  tasks:
+
+    ##
+    # House keeping
+    #
+    - name: General | update cache
+      apt: update-cache=yes
+
+    ##
+    # Apt package installation of required software.
+    #
+    - name: General | Install required packages.
+      action: apt pkg=$item state=installed
+      tags: common
+      with_items:
+        - build-essential
+        - php5
+        - php5-dev
+        - apache2
+        - mysql-server
+        - mysql-client
+        - php5-mysqlnd
+        - php5-xmlrpc
+        - php-soap
+        - php5-gd
+        - sendmail
+        - unzip
+        - python-mysqldb
+
+    ##
+    # Message of the day explaining server is under control of Ansible.
+    #
+    - name: General | Message of the day explaining server is under Ansible control.
+      action: copy src=files/etc-update-motd-d-95-ansible dest=/etc/update-motd.d/95-ansible mode=755
+      tags: common
+
+    ##
+    # PHP Setup.
+    #
+    - name: PHP | Configuration file, php.ini
+      action: template src=templates/etc-php5-apache2-php-ini.j2 dest=/etc/php5/apache2/php.ini
+      tags: common
+
+    ##
+    # MySQL database setup.
+    #
+    - name: MySQL | Configuration file, my.cnf
+      action: template src=templates/etc-mysql-my-cnf.j2 dest=/etc/mysql/my.cnf
+      tags: common
+
+    - include: ./common-tasks/mysql-secure.yml
+
+    ##
+    # Apache2 setup.
+    #
+    - name: Apache | Enable some required modules
+      action: command a2enmod rewrite vhost_alias
+      tags: common
+
+    - name: Apache | Configuration file for our site
+      action: template src=templates/etc-apache2-sites-available-devserver.j2 dest=/etc/apache2/sites-available/devserver
+      tags: common
+
+    - name: Apache | Disable the default site
+      action: command a2dissite default
+      tags: common
+
+    - name: Apache | Enable our new site
+      action: command a2ensite devserver
+      tags: common
+
+    ##
+    # Drush install, a Drupal shell tool.
+    #
+    - include: ./common-tasks/ubuntu-drush.yml
+
+    - include: ./common-tasks/pecl.yml
+
+    ##
+    # node.js installation (latest stable instead of Ubuntu's out-of-date one)
+    #
+    - name: Node.js | Package prerequisites for node.js
+      apt: pkg=python-software-properties state=installed
+      tags: nodejs
+
+    - name: Node.js | Add the node.js PPA
+      apt_repository: repo=ppa:chris-lea/node.js
+      tags: nodejs
+
+    - name: Node.js | Update the apt cache for the new repository
+      apt: update-cache=yes
+      tags: nodejs
+
+    - name: Node.js | Install nodejs
+      apt: pkg=nodejs state=installed
+      tags: nodejs
+
+    - name: Node.js | Install npm
+      shell: curl http://npmjs.org/install.sh | sudo sh creates=/usr/bin/npm
+      tags: nodejs
+
+    ##
+    # Redis server.
+    #
+    - name: Redis | Install redis
+      apt: pkg=redis-server state=installed
+      tags: redis
+
+  ##
+  # Include handlers
+  #
+  handlers:
+    - include: handlers.yml

@@ -1,0 +1,18 @@
+<VirtualHost *:80>
+  ServerName {{ project }}.local
+  ServerAdmin {{ apache_server_admin }}
+  
+  DocumentRoot /vagrant/{{ project }}/www
+  ErrorLog /vagrant/{{ project }}.apache.error.log
+  php_flag log_errors on
+  php_value error_reporting 'E_ALL & ~E_NOTICE'
+  php_value error_log /vagrant/{{ project }}/php.error.log
+
+  <Directory /vargrant/{{ project }}>
+    Options +FollowSymLinks Indexes
+    AllowOverride All
+    order allow,deny
+    allow from all
+  </Directory>
+
+</VirtualHost>

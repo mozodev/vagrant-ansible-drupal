@@ -1,0 +1,8 @@
+---
+# handlers.yml
+
+- name: restart apache
+  action: service name=apache2 state=restarted
+
+- name: Restart MySQL
+  action: service name=mysql state=restarted

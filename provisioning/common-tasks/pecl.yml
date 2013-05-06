@@ -1,0 +1,34 @@
+---
+##
+# Install pecl extensions
+# apc, xdebug, xhprof
+#
+
+- name: APC | Install via pecl
+  shell: pecl install apc creates=/etc/php5/conf.d/apc.ini
+  tags: common
+
+- name: APC | Cache configuration file, apc.ini
+  template: src=templates/etc-php5-conf-d-apc-ini.j2 dest=/etc/php5/conf.d/apc.ini
+  tags: common
+  notify:
+  - restart apache
+
+- name: xdebug | Install via pecl
+  shell: pecl install xdebug creates=/etc/php5/conf.d/xdebug.ini
+
+- name: xdebug | Debugging configuration file, xdebug.ini
+  template: src=templates/etc-php5-conf-d-xdebug-ini.j2 dest=/etc/php5/conf.d/xdebug.ini
+  tags: debug
+  notify:
+  - restart apache
+
+- name: xhprof | Install via pecl
+  shell: pecl install -f xhprof creates=/etc/php5/conf.d/xhprof.ini
+  tags: debug
+
+- name: xhprof | Debugging configuration file, xhprof.ini
+  template: src=templates/etc-php5-conf-d-xhprof-ini.j2 dest=/etc/php5/conf.d/xhprof.ini
+  tags: debug
+  notify:
+  - restart apache
