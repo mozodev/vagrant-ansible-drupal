@@ -17,7 +17,7 @@ Vagrant.configure("2") do |config|
 
   config.vm.provision :ansible do |ansible|
     ansible.playbook = "provisioning/setup.yml"
-    ansible.inventory_file = "/Users/apple/.ansible/hosts"
+    ansible.inventory_file = "ansible_host"
   end
 
 end
