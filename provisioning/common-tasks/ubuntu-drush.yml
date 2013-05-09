@@ -5,21 +5,44 @@
 # Ubuntu only due to using apt.
 #
 - name: Drush | Install PHP PEAR
-  action: apt pkg=php-pear state=installed
+  apt: pkg=php-pear state=installed
   tags: drush
 
 - name: Drush | Update PEAR
-  action: command pear upgrade-all
+  command: pear upgrade-all
   tags: drush
 
 - name: Drush | Setup PEAR channel
-  action: command pear channel-discover pear.drush.org creates=/usr/share/php/.channels/pear.drush.org.reg
+  command: pear channel-discover pear.drush.org creates=/usr/share/php/.channels/pear.drush.org.reg
   tags: drush
 
 - name: Drush | Install drush
-  action: command pear install drush/drush creates=/usr/bin/drush
+  command: pear install drush/drush creates=/usr/bin/drush
   tags: drush
 
 - name: Drush | Run drush once so it downloads it's dependencies
-  action: command drush
+  command: drush
+  ignore_errors: yes
   tags: drush
+
+- name: Drush | copy .bashrc for drush
+  copy: src=files/example.bashrc dest=/home/vagrant/.bashrc
+
+- name: Drush | Add drushrc.php
+  copy: src=files/drush-drushrc.php dest=/home/vagrant/.drush/drushrc.php
+
+- name: Drush - dev | Install Module Builder
+  command: drush dl -y module_builder chidr=/home/vagrant/.drush/
+  tags: drush-dev
+
+- name: Drush - dev | Add hooks data directory to drushrc.php
+  shell: echo $command_specific['mb-build']['write'] = TRUE; >> /home/vagrant/.drush/drushrc.php
+  tags: drush-dev
+
+- name: Drush - dev | Check if hook directory is present
+  file: path=/home/vagrant/.drush/hooks state=directory
+  tags: drush-dev
+
+- name: Drush - dev | Add hooks data directory to drushrc.php
+  shell: echo $options['data'] = '/home/vagrant/.drush/hooks'; >> /home/vagrant/.drush/drushrc.php
+  tags: drush-dev

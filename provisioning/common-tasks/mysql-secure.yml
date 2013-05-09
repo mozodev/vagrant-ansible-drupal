@@ -41,5 +41,5 @@
   tags: common
 
 - name: MySQL | Add vagrant user and Grant all privileges
-  mysql_user: user="vagrant" password="vagrant" host="*" priv=*.*:ALL state=present
+  mysql_user: user="vagrant" password="vagrant" host="%" priv=*.*:ALL state=present
   tags: common  

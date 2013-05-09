@@ -1,8 +1,11 @@
 ---
 # handlers.yml
 
-- name: restart apache
+- name: Restart apache
   action: service name=apache2 state=restarted
 
 - name: Restart MySQL
   action: service name=mysql state=restarted
+
+- name: Notify it's up!
+  command: /Application/terminal-notifier.app/Contents/MacOS/terminal-notifier -message 'Ansible finished provisionning. Time to vagrant ssh!'

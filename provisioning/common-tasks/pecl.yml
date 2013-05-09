@@ -5,7 +5,7 @@
 #
 
 - name: APC | Install via pecl
-  shell: pecl install apc creates=/etc/php5/conf.d/apc.ini
+  shell: printf "\n" | sudo pecl install apc creates=/etc/php5/conf.d/apc.ini
   tags: common
 
 - name: APC | Cache configuration file, apc.ini
@@ -15,7 +15,7 @@
   - restart apache
 
 - name: xdebug | Install via pecl
-  shell: pecl install xdebug creates=/etc/php5/conf.d/xdebug.ini
+  shell: pecl install xdebug creates=/etc/php5/conf.d/xdebug.ini 
 
 - name: xdebug | Debugging configuration file, xdebug.ini
   template: src=templates/etc-php5-conf-d-xdebug-ini.j2 dest=/etc/php5/conf.d/xdebug.ini

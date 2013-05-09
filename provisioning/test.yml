@@ -1,0 +1,14 @@
+---
+- hosts: all
+  gather_facts: yes
+  # vars_prompt:
+  #   test: "test?"
+
+  tasks:
+
+    - name: APC | Install via pecl
+      command: printf "\n" | sudo pecl install apc
+      tags: common
+
+
+drush qd www views pathauto --account-mail=mozo@next-aeon.com --account-name=vagrant --account-pass=vagrant --db-url=mysql://vagrant:vagrant@localhost/test --site-name=test --enable

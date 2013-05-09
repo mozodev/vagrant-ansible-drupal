@@ -2,24 +2,44 @@
 # Ansible playbook for setting up a new drupal project
 
 ---
-- hosts: all
+- hosts: vagrant
   user: vagrant
   sudo: yes
 
-  var_prompt:
-    project: "Project to name to add"
+  vars_prompt:
+    project: "Drupal project name"
+
+  vars_files:
+    - settings.yml
 
   tasks:
 
     - name: Apache | Add vhost for the project
-      action: template src=templates/etc-apache2-sites-available-devserver.j2 dest=/etc/apache2/sites-available/{{ project }}
-      tags: common
-
-    - name: Apache | Enable new project site
-      action: command a2ensite {{ project }}
-      notify:
-        - restart apache
-      tags: common
+      template: src=templates/etc-apache2-sites-available-devserver.j2 dest=/etc/apache2/sites-available/{{ project }}
 
     - name: Mysql | Create new database
       mysql_db: db={{ project }} state=present
+
+    - name: Drush | Download and install drupal 7
+      action: shell drush qd {{ project }} {{ modules }} -y --enable --account-mail={{ account_mail }} --account-name={{ account_name }} --account-pass={{ account_pass }} --site-name={{ site_name }} --locale={{ locale }} --db-url={{ db_url }} -y chdir=/vagrant
+      ignore_errors: yes
+
+    - name: Shell | Change drupal directory name to www
+      action: shell mv drupal www chdir=/vagrant/{{ project }}
+
+    # - name: Drush | Set aliases.drushrc.php
+    #   template: src=files/drush-aliases-drushrc-php.j2 dest=/home/vagrant/.drush/{{ project }}.aliases.drushrc.php
+    #
+    # - name: Drush | Creates directory for sql-dump
+    #   files: path=/vagrant/{{ project }}/sql-dump state=directory
+
+    - name: Apache | Enable new project site
+      shell: a2ensite {{ project }}
+      notify:
+        - Restart apache
+
+  ##
+  # Include handlers
+  #
+  handlers:
+    - include: handlers.yml

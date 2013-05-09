@@ -1,0 +1,26 @@
+<?php
+
+$aliases['dev'] = array(
+  'uri' => '{{ project }}.local',
+  'root' => '/vagrant/{{ project }}/www',
+);
+
+$aliases['stage'] = array(
+  'uri' => '{{ project }}.local',
+  'root' => '/vagrant/{{ project }}/www',
+  'remote-host' => '',
+  'remote-user' => '',
+  'path-aliases' => array(
+    '%dump-dir' => 'path_to_dump'
+  ),
+  'command-specific' => array (
+    'sql-sync' => array(
+      'no-cache' => TRUE,
+    ),
+  ),
+);
+
+$aliases['live'] = array(
+  'uri' => '{{ project }}.local',
+  'root' => '/vagrant/{{ project }}/www',
+);

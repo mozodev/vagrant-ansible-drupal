@@ -1,0 +1,36 @@
+##
+# Ansible playbook for remove drupal project
+
+---
+- hosts: all
+  user: vagrant
+  sudo: yes
+
+  vars_prompt:
+    project: "Project to name to delete"
+
+  vars_files:
+    - settings.yml
+
+  tasks:
+
+    # check if the project is present and then
+    - name: Apache | Disable virtual host for the project
+      shell: a2dissite {{ project }}
+      notify:
+        - restart apache
+
+    - name: Apache | Delete the virtual host conf file
+      file: path=/etc/apache2/site-available/{{ project }} state=absent
+
+    - name: Apache | Delete the project directory
+      file: path=/vagrant/{{ project }} state=absent
+
+    - name: Mysql | Delete the database
+      mysql_db: db={{ project }} state=absent
+
+  ##
+  # Include handlers
+  #
+  handlers:
+    - include: handlers.yml
