@@ -77,6 +77,8 @@
     - name: Apache | Enable some required modules
       action: command a2enmod rewrite vhost_alias
       tags: common
+      notify:
+        - Restart apache
 
     ##
     # Drush install, a Drupal shell tool.
@@ -114,7 +116,6 @@
     - name: Redis | Install redis
       apt: pkg=redis-server state=installed
       tags: redis
-      notify: Notify it's up!
 
   ##
   # Include handlers
