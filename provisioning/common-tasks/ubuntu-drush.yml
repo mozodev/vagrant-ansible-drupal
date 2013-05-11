@@ -25,6 +25,9 @@
   ignore_errors: yes
   tags: drush
 
+- name: Drush | Ensure .drush directory present
+  file: path=/home/vagrant/.drush state=directory
+
 - name: Drush | copy .bashrc for drush
   copy: src=files/example.bashrc dest=/home/vagrant/.bashrc
 
@@ -32,7 +35,7 @@
   copy: src=files/drush-drushrc.php dest=/home/vagrant/.drush/drushrc.php
 
 - name: Drush - dev | Install Module Builder
-  command: drush dl -y module_builder chidr=/home/vagrant/.drush/
+  command: drush dl -y module_builder --destination=/home/vagrant/.drush/ creates=/home/vagrant/.drush/module_builder
   tags: drush-dev
 
 - name: Drush - dev | Add hooks data directory to drushrc.php
