@@ -1,33 +1,41 @@
 ---
 ##
-# Install pecl extensions
+# Install PECL extensions
 # apc, xdebug, xhprof
 #
+#
 
-- name: APC | Install via pecl
-  shell: printf "\n" | sudo pecl install apc creates=/etc/php5/conf.d/apc.ini
-  tags: common
+- name: APC | Test for previous apc install
+  shell: pecl list | grep -i 'apc' || true
+  register: php_pecl_xdebug_exists
 
-- name: APC | Cache configuration file, apc.ini
-  template: src=templates/etc-php5-conf-d-apc-ini.j2 dest=/etc/php5/conf.d/apc.ini
-  tags: common
+- name: APC | apc install
+  command: pecl install apc
+  when_string: ${php_pecl_xdebug_exists.stdout} == ''
+
+- name: APC | Fetch PHP extension dir
+  shell: php -i | grep -i '^extension_dir' | awk '{print $3}'
+  register: php_extension_dir
+
+- name: APC | Set apc config
+  template: src=templates/etc-php5-conf-d-apc-ini.j2 dest=/etc/php5/conf.d/xdebug.ini
   notify:
   - Restart apache
 
-- name: xdebug | Install via pecl
+- name: XDEBUG | Install via pecl
   shell: pecl install xdebug creates=/etc/php5/conf.d/xdebug.ini
 
-- name: xdebug | Debugging configuration file, xdebug.ini
+- name: XDEBUG | Debugging configuration file, xdebug.ini
   template: src=templates/etc-php5-conf-d-xdebug-ini.j2 dest=/etc/php5/conf.d/xdebug.ini
   tags: debug
   notify:
   - Restart apache
 
-- name: xhprof | Install via pecl
+- name: XHPROF | Install via pecl
   shell: pecl install -f xhprof creates=/etc/php5/conf.d/xhprof.ini
   tags: debug
 
-- name: xhprof | Debugging configuration file, xhprof.ini
+- name: XHPROF | Debugging configuration file, xhprof.ini
   template: src=templates/etc-php5-conf-d-xhprof-ini.j2 dest=/etc/php5/conf.d/xhprof.ini
   tags: debug
   notify:
